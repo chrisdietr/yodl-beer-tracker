@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 42 43% 94%;
+  --foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --primary: 35 81% 50%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 39 38% 85%;
+  --secondary-foreground: 24 9.8% 10%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --accent: 89 41% 44%;
+  --accent-foreground: 211 100% 99%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --border: 39 38% 85%;
+  --input: 20 5.9% 90%;
+  --ring: 35 81% 50%;
+  --radius: 0.5rem;
+  
+  /* Beer colors */
+  --beer-amber: 39 81% 50%;
+  --beer-light: 42 43% 94%;
+  --beer-dark: 39 78% 43%;
+  --beer-foam: 47 100% 96%;
+  --barrel-brown: 26 52% 35%;
+  --barrel-light: 27 32% 49%;
+  --barrel-dark: 27 54% 29%;
+  --hops-green: 89 41% 44%;
+  --hops-light: 88 42% 48%;
+  
+  --chart-1: var(--beer-amber);
+  --chart-2: var(--barrel-brown);
+  --chart-3: var(--hops-green);
+  --chart-4: 215 90% 50%;
+  --chart-5: 262 83% 58%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-beer-light font-roboto text-barrel-dark;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bungee;
+  }
+}
+
+/* Beer-themed styles */
+.beer-bubble {
+  animation: float 3s ease-in-out infinite;
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 251, 235, 0.8);
+  z-index: 0;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(-100px); opacity: 0; }
+}
+
+.barrel-shine {
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%);
+  border-radius: 50%;
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 30%;
+  height: 15%;
+  transform: rotate(-20deg);
+}
+
+.refresh-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ranking-change {
+  animation: pulse 2s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
