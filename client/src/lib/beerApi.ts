@@ -25,6 +25,8 @@ const API_ENDPOINTS = {
 
 const WEBHOOK_URL = import.meta.env.VITE_BEER_WEBHOOK_URL;
 
+console.log('VITE_BEER_WEBHOOK_URL:', import.meta.env.VITE_BEER_WEBHOOK_URL);
+
 // --- Data transformation helpers ---
 
 type Payment = {
@@ -127,6 +129,7 @@ export function useAppStats(timeRange = 'day') {
   return useQuery({
     queryKey: [WEBHOOK_URL, timeRange],
     queryFn: async () => {
+      console.log('Fetching from:', WEBHOOK_URL);
       const res = await fetch(WEBHOOK_URL);
       if (!res.ok) throw new Error('Failed to fetch payments data');
       const payments = await res.json();
