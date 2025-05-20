@@ -23,8 +23,7 @@ const API_ENDPOINTS = {
   brzTokenHolders: "/api/brz-token-holders"
 };
 
-const WEBHOOK_URL =
-  "https://n8nio.ipecloud.xyz/webhook/0f7e3eee-9d0a-4b29-88c8-00d39f272e94";
+const WEBHOOK_URL = import.meta.env.VITE_BEER_WEBHOOK_URL;
 
 // --- Data transformation helpers ---
 
