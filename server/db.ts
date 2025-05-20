@@ -30,6 +30,21 @@ sqlite.exec(`
     total_beers INTEGER NOT NULL,
     current_pace INTEGER NOT NULL
   );
+  
+  CREATE TABLE IF NOT EXISTS app_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS brz_token_holders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    initial TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 export default db;

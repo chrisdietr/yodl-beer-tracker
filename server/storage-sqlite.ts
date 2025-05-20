@@ -1,5 +1,5 @@
 import { 
-  drinkers, beerConsumptions, stats,
+  drinkers, beerConsumptions, stats, appConfig, brzTokenHolders,
   type Drinker, type InsertDrinker, 
   type BeerConsumption, type InsertBeerConsumption,
   type Stat, type StatsResponse, type DrinkerWithStats, type TimeSeriesData
@@ -33,37 +33,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   async seedInitialData(): Promise<void> {
-    // Check if we already have data
+    // Check if we already have all data
     const existingDrinkers = await this.getDrinkers();
-    if (existingDrinkers.length > 0) {
-      return; // Data already exists, no need to seed
-    }
-
-    // Add initial drinkers
-    const initialDrinkers = [
-      { username: "Chris", initial: "C" },
-      { username: "Fran", initial: "F" },
-      { username: "Maria", initial: "M" },
-      { username: "Jorge", initial: "J" },
-      { username: "Ana", initial: "A" },
-    ];
-
-    for (const drinker of initialDrinkers) {
-      await this.createDrinker(drinker);
-    }
-
-    // Add some initial beer consumptions
-    const now = new Date();
+    const existingConfigCount = await db.select().from(appConfig).execute();
+    const existingBrzTokens = await db.select().from(brzTokenHolders).execute();
     
-    // Create more consumptions for the first few drinkers
-    await this.addConsumptionsForDrinker(1, 18, now);
-    await this.addConsumptionsForDrinker(2, 15, now);
-    await this.addConsumptionsForDrinker(3, 9, now);
-    await this.addConsumptionsForDrinker(4, 7, now);
-    await this.addConsumptionsForDrinker(5, 5, now);
+    const hasConfig = existingConfigCount.length > 0;
+    const hasBrzTokens = existingBrzTokens.length > 0;
+    
+    // Add initial drinkers if none exist
+    if (existingDrinkers.length === 0) {
+      // Add initial drinkers
+      const initialDrinkers = [
+        { username: "Chris", initial: "C" },
+        { username: "Fran", initial: "F" },
+        { username: "Maria", initial: "M" },
+        { username: "Jorge", initial: "J" },
+        { username: "Ana", initial: "A" },
+      ];
 
-    // Create initial stats
-    await this.createStats(42, 3.5);
+      for (const drinker of initialDrinkers) {
+        await this.createDrinker(drinker);
+      }
+
+      // Add some initial beer consumptions
+      const now = new Date();
+      
+      // Create more consumptions for the first few drinkers
+      await this.addConsumptionsForDrinker(1, 18, now);
+      await this.addConsumptionsForDrinker(2, 15, now);
+      await this.addConsumptionsForDrinker(3, 9, now);
+      await this.addConsumptionsForDrinker(4, 7, now);
+      await this.addConsumptionsForDrinker(5, 5, now);
+
+      // Create initial stats
+      await this.createStats(54, 3);
+    }
+    
+    // Add app configuration if none exists
+    if (!hasConfig) {
+      await db.insert(appConfig).values([
+        { 
+          key: "today_barrel_capacity", 
+          value: "200", 
+          updatedAt: new Date().toISOString() 
+        },
+        { 
+          key: "record_barrel_capacity", 
+          value: "200", 
+          updatedAt: new Date().toISOString() 
+        },
+        { 
+          key: "record_barrel_count", 
+          value: "85", 
+          updatedAt: new Date().toISOString() 
+        }
+      ]);
+    }
+    
+    // Add BRZ token holders if none exist
+    if (!hasBrzTokens) {
+      await db.insert(brzTokenHolders).values([
+        { username: "Maria", initial: "M", amount: 1250, updatedAt: new Date().toISOString() },
+        { username: "Chris", initial: "C", amount: 980, updatedAt: new Date().toISOString() },
+        { username: "Jorge", initial: "J", amount: 750, updatedAt: new Date().toISOString() },
+        { username: "Ana", initial: "A", amount: 525, updatedAt: new Date().toISOString() }
+      ]);
+    }
   }
 
   private async addConsumptionsForDrinker(drinkerId: number, count: number, baseTime: Date) {
@@ -357,7 +393,6 @@ export class DatabaseStorage implements IStorage {
     // Calculate today's consumption
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayIso = today.toISOString();
     
     const todayConsumptions = allConsumptions.filter(
       beer => new Date(beer.timestamp) >= today
@@ -366,11 +401,26 @@ export class DatabaseStorage implements IStorage {
     // Get the current pace (beers per hour)
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-    const oneHourAgoIso = oneHourAgo.toISOString();
     
     const beersLastHour = allConsumptions.filter(
       beer => new Date(beer.timestamp) > oneHourAgo
     ).length;
+    
+    // Get configuration from the database
+    const configItems = await db.select().from(appConfig);
+    
+    // Parse configuration values with defaults in case they're not found
+    const todayBarrelCapacity = parseInt(
+      configItems.find(item => item.key === "today_barrel_capacity")?.value || "200"
+    );
+    
+    const recordBarrelCapacity = parseInt(
+      configItems.find(item => item.key === "record_barrel_capacity")?.value || "200"
+    );
+    
+    const recordBarrelCount = parseInt(
+      configItems.find(item => item.key === "record_barrel_count")?.value || "85"
+    );
     
     return {
       totalBeers: allConsumptions.length,
@@ -383,11 +433,11 @@ export class DatabaseStorage implements IStorage {
       currentPace: beersLastHour,
       todayBarrel: {
         count: todayConsumptions.length,
-        capacity: 200 // 200 free beers today
+        capacity: todayBarrelCapacity
       },
       recordBarrel: {
-        count: 85, // Fixed record for demo
-        capacity: 200
+        count: recordBarrelCount,
+        capacity: recordBarrelCapacity
       },
       drinkers: leaderboard,
       timeSeriesData

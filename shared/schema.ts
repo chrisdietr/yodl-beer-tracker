@@ -25,6 +25,23 @@ export const stats = sqliteTable("stats", {
   currentPace: integer("current_pace").notNull(),
 });
 
+// App configuration model to store settings
+export const appConfig = sqliteTable("app_config", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// BRZ token holders model
+export const brzTokenHolders = sqliteTable("brz_token_holders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull(),
+  initial: text("initial").notNull(),
+  amount: integer("amount").notNull(),
+  updatedAt: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
 // Schema for inserting new drinkers
 export const insertDrinkerSchema = createInsertSchema(drinkers).pick({
   username: true,
