@@ -3,6 +3,15 @@ import { StatsResponse, DrinkerWithStats, TimeSeriesData } from "@shared/schema"
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 
+// BRZ token holder interface
+export interface BrzTokenHolder {
+  id: number;
+  username: string;
+  initial: string;
+  amount: number;
+  updatedAt: string;
+}
+
 // API endpoints
 const API_ENDPOINTS = {
   stats: "/api/stats",
@@ -10,7 +19,8 @@ const API_ENDPOINTS = {
   timeSeries: "/api/stats/timeseries",
   consumptions: "/api/consumptions",
   drinkers: "/api/drinkers",
-  webhook: "/api/webhook/beer"
+  webhook: "/api/webhook/beer",
+  brzTokenHolders: "/api/brz-token-holders"
 };
 
 // Hook to fetch app stats
@@ -71,5 +81,12 @@ export function useAddDrinker() {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.stats] });
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.leaderboard] });
     },
+  });
+}
+
+// Hook to fetch BRZ token holders
+export function useBrzTokenHolders() {
+  return useQuery<BrzTokenHolder[]>({
+    queryKey: [API_ENDPOINTS.brzTokenHolders],
   });
 }

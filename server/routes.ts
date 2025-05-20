@@ -43,6 +43,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching leaderboard" });
     }
   });
+  
+  // Get BRZ token holders
+  app.get("/api/brz-token-holders", async (req: Request, res: Response) => {
+    try {
+      const holders = await storage.getBrzTokenHolders();
+      res.json(holders);
+    } catch (error) {
+      console.error("Error getting BRZ token holders:", error);
+      res.status(500).json({ message: "Error fetching BRZ token holders data" });
+    }
+  });
 
   // Add a new drinker
   app.post("/api/drinkers", async (req: Request, res: Response) => {

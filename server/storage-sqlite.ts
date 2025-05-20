@@ -4,6 +4,14 @@ import {
   type BeerConsumption, type InsertBeerConsumption,
   type Stat, type StatsResponse, type DrinkerWithStats, type TimeSeriesData
 } from "@shared/schema";
+
+// BRZ Token Holder interface
+export interface BrzTokenHolder {
+  id: number;
+  username: string;
+  initial: string;
+  amount: number;
+}
 import { formatDistanceToNow } from "date-fns";
 import { db } from "./db";
 import { eq, desc, gte, and, lt } from "drizzle-orm";
@@ -21,6 +29,7 @@ export interface IStorage {
   getLeaderboard(): Promise<DrinkerWithStats[]>;
   getTimeSeriesData(timeRange: string): Promise<TimeSeriesData[]>;
   getAppStats(): Promise<StatsResponse>;
+  getBrzTokenHolders(): Promise<any[]>;
   seedInitialData(): Promise<void>;
 }
 
@@ -188,6 +197,12 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return result[0];
+  }
+
+  async getBrzTokenHolders(): Promise<BrzTokenHolder[]> {
+    // Get BRZ token holders from database
+    const holders = await db.select().from(brzTokenHolders).orderBy(desc(brzTokenHolders.amount));
+    return holders;
   }
 
   async getLeaderboard(): Promise<DrinkerWithStats[]> {
