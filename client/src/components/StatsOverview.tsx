@@ -1,10 +1,13 @@
 import { StatsResponse } from "@shared/schema";
+import { useBrzTokenHolders, type BrzTokenHolder } from "../lib/beerApi";
 
 interface StatsOverviewProps {
   stats: StatsResponse;
 }
 
 export default function StatsOverview({ stats }: StatsOverviewProps) {
+  // Fetch BRZ token holders data from API
+  const { data: brzTokenHolders, isLoading: isLoadingBrz } = useBrzTokenHolders();
   // Determine pace message based on current pace
   const getPaceMessage = (pace: number) => {
     if (pace === 0) return "No beers in the last hour!";
@@ -57,43 +60,30 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
         </div>
         <div className="overflow-y-auto max-h-32 pr-2">
           <div className="space-y-2">
-            {/* Mock BRZ token holders - in a real app, this would fetch from Base blockchain */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">M</span>
-                </div>
-                <span className="ml-2 text-sm font-medium">Maria</span>
+            {isLoadingBrz ? (
+              // Loading state
+              <div className="flex justify-center items-center h-16">
+                <div className="animate-pulse text-beer-amber">Loading BRZ token data...</div>
               </div>
-              <span className="text-sm font-bold text-hops-green">1,250 BRZ</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">C</span>
+            ) : brzTokenHolders && brzTokenHolders.length > 0 ? (
+              // BRZ token holders from the database
+              brzTokenHolders.map((holder) => (
+                <div key={holder.id} className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-white">{holder.initial}</span>
+                    </div>
+                    <span className="ml-2 text-sm font-medium">{holder.username}</span>
+                  </div>
+                  <span className="text-sm font-bold text-hops-green">{holder.amount.toLocaleString()} BRZ</span>
                 </div>
-                <span className="ml-2 text-sm font-medium">Chris</span>
+              ))
+            ) : (
+              // No data state
+              <div className="text-center py-4">
+                <p className="text-barrel-light">No BRZ token holders found.</p>
               </div>
-              <span className="text-sm font-bold text-hops-green">980 BRZ</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">J</span>
-                </div>
-                <span className="ml-2 text-sm font-medium">Jorge</span>
-              </div>
-              <span className="text-sm font-bold text-hops-green">750 BRZ</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">A</span>
-                </div>
-                <span className="ml-2 text-sm font-medium">Ana</span>
-              </div>
-              <span className="text-sm font-bold text-hops-green">525 BRZ</span>
-            </div>
+            )}
           </div>
         </div>
         
