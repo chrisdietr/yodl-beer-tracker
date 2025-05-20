@@ -1,4 +1,5 @@
 import { DrinkerWithStats } from "@shared/schema";
+import { formatDistanceToNow } from "../lib/timeUtils";
 
 interface LeaderboardProps {
   drinkers: DrinkerWithStats[];
@@ -52,7 +53,7 @@ export default function Leaderboard({ drinkers, isLoading }: LeaderboardProps) {
                   <div className="flex-1">
                     <h3 className="text-lg font-bold">{drinker.username}</h3>
                     <p className="text-sm text-barrel-light">
-                      Last beer: {drinker.lastBeer || 'Never'}
+                      Last beer: {drinker.lastBeer ? formatDistanceToNow(new Date(drinker.lastBeer)) : 'Never'}
                     </p>
                   </div>
                   <div className="text-2xl font-bungee text-beer-amber">{drinker.count}</div>

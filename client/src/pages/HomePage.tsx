@@ -9,6 +9,7 @@ import ConsumptionChart from "@/components/ConsumptionChart";
 import BarrelVisualization from "@/components/BarrelVisualization";
 import PizzaDayFooter from "@/components/PizzaDayFooter";
 import { NotificationProvider, NotificationContainer, useNotification } from "@/components/Notification";
+import { useAppStats } from "@/lib/beerApi";
 
 export default function HomePage() {
   return (
@@ -27,11 +28,8 @@ function HomePageContent() {
   // Reference to track previous leaderboard state for comparison
   const prevLeaderboardRef = useRef<DrinkerWithStats[]>([]);
 
-  // Fetch app stats
-  const { data: stats, isLoading, error, refetch } = useQuery<StatsResponse>({
-    queryKey: ['/api/stats'],
-    refetchInterval: 10000 // Auto-refresh every 10 seconds
-  });
+  // Fetch app stats from webhook
+  const { data: stats, isLoading, error, refetch } = useAppStats(timeRange);
 
   // Refetch data handler
   const handleRefresh = async () => {

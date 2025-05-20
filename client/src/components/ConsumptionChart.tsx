@@ -42,6 +42,14 @@ export default function ConsumptionChart({
     const labels = timeSeriesData.map(item => formatTimeLabel(item.timestamp));
     const data = timeSeriesData.map(item => item.count);
     
+    // Calculate cumulative sum for each point
+    const cumulativeData = [];
+    let runningTotal = 0;
+    for (const item of timeSeriesData) {
+      runningTotal += item.count;
+      cumulativeData.push(runningTotal);
+    }
+    
     // Destroy previous chart if it exists
     if (chartInstance.current) {
       chartInstance.current.destroy();
@@ -52,21 +60,34 @@ export default function ConsumptionChart({
       type: 'line',
       data: {
         labels,
-        datasets: [{
-          label: 'Beers Consumed',
-          data,
-          borderColor: '#E6A817',
-          backgroundColor: 'rgba(230, 168, 23, 0.1)',
-          fill: true,
-          tension: 0.3
-        }]
+        datasets: [
+          {
+            label: 'Beers Consumed',
+            data,
+            borderColor: '#E6A817',
+            backgroundColor: 'rgba(230, 168, 23, 0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Cumulative Total',
+            data: cumulativeData,
+            borderColor: '#8B5A2B',
+            backgroundColor: 'rgba(139, 90, 43, 0.1)',
+            fill: false,
+            tension: 0.1,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            yAxisID: 'y',
+          }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false
+            display: true
           },
           tooltip: {
             backgroundColor: '#8B5A2B',
@@ -81,6 +102,9 @@ export default function ConsumptionChart({
             },
             callbacks: {
               label: function(context) {
+                if (context.dataset.label === 'Cumulative Total') {
+                  return `${context.parsed.y} total beers`;
+                }
                 return `${context.parsed.y} beers consumed`;
               }
             }
