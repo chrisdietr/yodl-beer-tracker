@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage-sqlite"; // Use SQLite implementation
 import { insertBeerConsumptionSchema, insertDrinkerSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {

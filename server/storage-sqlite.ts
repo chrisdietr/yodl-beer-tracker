@@ -21,33 +21,24 @@ export interface IStorage {
   getLeaderboard(): Promise<DrinkerWithStats[]>;
   getTimeSeriesData(timeRange: string): Promise<TimeSeriesData[]>;
   getAppStats(): Promise<StatsResponse>;
+  seedInitialData(): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private drinkers: Map<number, Drinker>;
-  private beerConsumptions: Map<number, BeerConsumption>;
-  private stats: Map<number, Stat>;
-  private drinkerIdCounter: number;
-  private beerIdCounter: number;
-  private statsIdCounter: number;
-  private lastLeaderboard: DrinkerWithStats[];
+export class DatabaseStorage implements IStorage {
+  private lastLeaderboard: DrinkerWithStats[] = [];
   private initialTimeStamp: Date;
 
   constructor() {
-    this.drinkers = new Map();
-    this.beerConsumptions = new Map();
-    this.stats = new Map();
-    this.drinkerIdCounter = 1;
-    this.beerIdCounter = 1;
-    this.statsIdCounter = 1;
-    this.lastLeaderboard = [];
     this.initialTimeStamp = new Date();
-    
-    // Add some initial data
-    this.seedInitialData();
   }
 
-  private seedInitialData() {
+  async seedInitialData(): Promise<void> {
+    // Check if we already have data
+    const existingDrinkers = await this.getDrinkers();
+    if (existingDrinkers.length > 0) {
+      return; // Data already exists, no need to seed
+    }
+
     // Add initial drinkers
     const initialDrinkers = [
       { username: "Chris", initial: "C" },
@@ -57,86 +48,78 @@ export class MemStorage implements IStorage {
       { username: "Ana", initial: "A" },
     ];
 
-    initialDrinkers.forEach(drinker => {
-      this.createDrinker(drinker);
-    });
+    for (const drinker of initialDrinkers) {
+      await this.createDrinker(drinker);
+    }
 
     // Add some initial beer consumptions
     const now = new Date();
     
     // Create more consumptions for the first few drinkers
-    this.addConsumptionsForDrinker(1, 18, now);
-    this.addConsumptionsForDrinker(2, 15, now);
-    this.addConsumptionsForDrinker(3, 9, now);
-    this.addConsumptionsForDrinker(4, 7, now);
-    this.addConsumptionsForDrinker(5, 5, now);
+    await this.addConsumptionsForDrinker(1, 18, now);
+    await this.addConsumptionsForDrinker(2, 15, now);
+    await this.addConsumptionsForDrinker(3, 9, now);
+    await this.addConsumptionsForDrinker(4, 7, now);
+    await this.addConsumptionsForDrinker(5, 5, now);
 
     // Create initial stats
-    this.createStats(42, 3.5);
+    await this.createStats(42, 3.5);
   }
 
-  private addConsumptionsForDrinker(drinkerId: number, count: number, baseTime: Date) {
+  private async addConsumptionsForDrinker(drinkerId: number, count: number, baseTime: Date) {
     for (let i = 0; i < count; i++) {
       const time = new Date(baseTime);
       // Distribute the beers over the last couple of hours
       time.setMinutes(time.getMinutes() - Math.floor(Math.random() * 120));
       
-      const beerIdForMemo = this.beerIdCounter + 1;
-      this.beerConsumptions.set(this.beerIdCounter++, {
-        id: beerIdForMemo,
+      await this.createBeerConsumption({
         drinkerId,
-        timestamp: time,
         memo: `Beer ${i + 1} for drinker ${drinkerId}`
       });
     }
   }
 
   async getDrinkers(): Promise<Drinker[]> {
-    return Array.from(this.drinkers.values());
+    return await db.select().from(drinkers);
   }
 
   async getDrinker(id: number): Promise<Drinker | undefined> {
-    return this.drinkers.get(id);
+    const result = await db.select().from(drinkers).where(eq(drinkers.id, id));
+    return result[0];
   }
 
   async getDrinkerByUsername(username: string): Promise<Drinker | undefined> {
-    return Array.from(this.drinkers.values()).find(
-      (drinker) => drinker.username.toLowerCase() === username.toLowerCase()
+    const result = await db.select().from(drinkers).where(
+      eq(drinkers.username, username)
     );
+    return result[0];
   }
 
   async createDrinker(drinker: InsertDrinker): Promise<Drinker> {
-    const id = this.drinkerIdCounter++;
-    const newDrinker: Drinker = { ...drinker, id };
-    this.drinkers.set(id, newDrinker);
-    return newDrinker;
+    const result = await db.insert(drinkers).values(drinker).returning();
+    return result[0];
   }
 
   async getBeerConsumptions(): Promise<BeerConsumption[]> {
-    return Array.from(this.beerConsumptions.values());
+    return await db.select().from(beerConsumptions);
   }
 
   async getBeerConsumptionsByDrinker(drinkerId: number): Promise<BeerConsumption[]> {
-    return Array.from(this.beerConsumptions.values()).filter(
-      (consumption) => consumption.drinkerId === drinkerId
-    );
+    return await db.select().from(beerConsumptions)
+      .where(eq(beerConsumptions.drinkerId, drinkerId));
   }
 
   async createBeerConsumption(consumption: InsertBeerConsumption): Promise<BeerConsumption> {
-    const id = this.beerIdCounter++;
-    const timestamp = new Date();
+    // Ensure memo is not undefined or null
+    const memo = consumption.memo || "";
     
-    // Default memo to empty string if it's null or undefined
-    const memoString = typeof consumption.memo === 'string' ? consumption.memo : "";
-    
-    const newConsumption: BeerConsumption = { 
-      id, 
-      drinkerId: consumption.drinkerId, 
-      timestamp, 
-      memo: memoString 
-    };
-    
-    this.beerConsumptions.set(id, newConsumption);
+    const result = await db.insert(beerConsumptions)
+      .values({
+        drinkerId: consumption.drinkerId,
+        memo,
+        timestamp: new Date().toISOString()
+      })
+      .returning();
     
     // Recalculate and update stats
     const allConsumptions = await this.getBeerConsumptions();
@@ -145,59 +128,63 @@ export class MemStorage implements IStorage {
     // Calculate pace (beers per hour) based on the last hour
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+    const oneHourAgoIso = oneHourAgo.toISOString();
     
-    const beersLastHour = allConsumptions.filter(
-      beer => beer.timestamp > oneHourAgo
-    ).length;
+    const beersLastHour = (await db.select().from(beerConsumptions)
+      .where(gte(beerConsumptions.timestamp, oneHourAgoIso))).length;
     
-    this.createStats(totalBeers, beersLastHour);
+    await this.createStats(totalBeers, beersLastHour);
     
-    return newConsumption;
+    return result[0];
   }
 
   async getStats(): Promise<Stat[]> {
-    return Array.from(this.stats.values());
+    return await db.select().from(stats);
   }
 
   async createStats(totalBeers: number, currentPace: number): Promise<Stat> {
-    const id = this.statsIdCounter++;
-    const timestamp = new Date();
-    const newStat: Stat = { id, timestamp, totalBeers, currentPace };
-    this.stats.set(id, newStat);
-    return newStat;
+    const result = await db.insert(stats)
+      .values({
+        timestamp: new Date().toISOString(),
+        totalBeers,
+        currentPace
+      })
+      .returning();
+    
+    return result[0];
   }
 
   async getLeaderboard(): Promise<DrinkerWithStats[]> {
-    const drinkers = await this.getDrinkers();
+    const allDrinkers = await this.getDrinkers();
     const allConsumptions = await this.getBeerConsumptions();
     
-    const currentLeaderboard: DrinkerWithStats[] = await Promise.all(
-      drinkers.map(async (drinker) => {
-        const drinkerConsumptions = allConsumptions.filter(
-          (consumption) => consumption.drinkerId === drinker.id
-        );
-        
-        const count = drinkerConsumptions.length;
-        
-        // Find the most recent beer
-        const sortedConsumptions = [...drinkerConsumptions].sort(
-          (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-        );
-        
-        const lastBeer = sortedConsumptions.length > 0 
-          ? formatDistanceToNow(sortedConsumptions[0].timestamp, { addSuffix: true })
-          : undefined;
-        
-        return {
-          id: drinker.id,
-          username: drinker.username,
-          initial: drinker.initial,
-          count,
-          lastBeer,
-          trend: "neutral" // Default to neutral
-        };
-      })
-    );
+    const currentLeaderboard: DrinkerWithStats[] = [];
+    
+    for (const drinker of allDrinkers) {
+      const drinkerConsumptions = allConsumptions.filter(
+        consumption => consumption.drinkerId === drinker.id
+      );
+      
+      const count = drinkerConsumptions.length;
+      
+      // Find the most recent beer
+      const sortedConsumptions = [...drinkerConsumptions].sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      
+      const lastBeer = sortedConsumptions.length > 0 
+        ? formatDistanceToNow(new Date(sortedConsumptions[0].timestamp), { addSuffix: true })
+        : undefined;
+      
+      currentLeaderboard.push({
+        id: drinker.id,
+        username: drinker.username,
+        initial: drinker.initial,
+        count,
+        lastBeer,
+        trend: "neutral" // Default to neutral
+      });
+    }
     
     // Sort by count, highest first
     currentLeaderboard.sort((a, b) => b.count - a.count);
@@ -239,15 +226,15 @@ export class MemStorage implements IStorage {
     
     // Sort by timestamp
     const sortedConsumptions = [...allConsumptions].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
     
     if (sortedConsumptions.length === 0) {
       return [];
     }
     
-    let startTime: Date;
     const endTime = new Date();
+    let startTime: Date;
     
     // Determine start time based on timeRange
     switch (timeRange) {
@@ -304,7 +291,10 @@ export class MemStorage implements IStorage {
       
       // Count beers in this interval
       const beersInInterval = sortedConsumptions.filter(
-        beer => beer.timestamp >= currentTime && beer.timestamp < nextTime
+        beer => {
+          const beerTime = new Date(beer.timestamp);
+          return beerTime >= currentTime && beerTime < nextTime;
+        }
       ).length;
       
       // Update running total
@@ -367,17 +357,19 @@ export class MemStorage implements IStorage {
     // Calculate today's consumption
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayIso = today.toISOString();
     
     const todayConsumptions = allConsumptions.filter(
-      beer => beer.timestamp >= today
+      beer => new Date(beer.timestamp) >= today
     );
     
     // Get the current pace (beers per hour)
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+    const oneHourAgoIso = oneHourAgo.toISOString();
     
     const beersLastHour = allConsumptions.filter(
-      beer => beer.timestamp > oneHourAgo
+      beer => new Date(beer.timestamp) > oneHourAgo
     ).length;
     
     return {
@@ -403,4 +395,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

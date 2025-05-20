@@ -1,26 +1,26 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Beer drinker model
-export const drinkers = pgTable("drinkers", {
-  id: serial("id").primaryKey(),
+export const drinkers = sqliteTable("drinkers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
   initial: text("initial").notNull(),
 });
 
 // Beer consumption model
-export const beerConsumptions = pgTable("beer_consumptions", {
-  id: serial("id").primaryKey(),
+export const beerConsumptions = sqliteTable("beer_consumptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   drinkerId: integer("drinker_id").notNull(),
-  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  timestamp: text("timestamp").notNull().$defaultFn(() => new Date().toISOString()),
   memo: text("memo").notNull().default(""),
 });
 
 // Stats model to store historical data
-export const stats = pgTable("stats", {
-  id: serial("id").primaryKey(),
-  timestamp: timestamp("timestamp").notNull().defaultNow(),
+export const stats = sqliteTable("stats", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  timestamp: text("timestamp").notNull().$defaultFn(() => new Date().toISOString()),
   totalBeers: integer("total_beers").notNull(),
   currentPace: integer("current_pace").notNull(),
 });
