@@ -383,11 +383,11 @@ export class DatabaseStorage implements IStorage {
       currentPace: beersLastHour,
       todayBarrel: {
         count: todayConsumptions.length,
-        capacity: 50 // Fixed capacity for today
+        capacity: 200 // 200 free beers today
       },
       recordBarrel: {
         count: 85, // Fixed record for demo
-        capacity: 100
+        capacity: 200
       },
       drinkers: leaderboard,
       timeSeriesData

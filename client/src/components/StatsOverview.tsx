@@ -49,29 +49,72 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
         </div>
       </div>
       
-      {/* Most active drinker card */}
+      {/* BRZ token holders card */}
       <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-hops-green">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-bold text-barrel-dark">Top Chugger</h3>
-          <i className="ri-trophy-fill text-2xl text-hops-green"></i>
+          <h3 className="text-lg font-bold text-barrel-dark">Gib Beer Token</h3>
+          <i className="ri-coin-fill text-2xl text-hops-green"></i>
         </div>
-        {stats.topDrinker ? (
-          <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-beer-amber rounded-full flex items-center justify-center border-2 border-beer-dark overflow-hidden relative">
-              <span className="text-2xl font-bold text-white">{stats.topDrinker.initial}</span>
-              <div className="barrel-shine"></div>
-            </div>
-            <div>
-              <h4 className="text-xl font-bold text-hops-green">{stats.topDrinker.name}</h4>
-              <div className="flex items-end">
-                <span className="text-3xl font-bungee text-beer-amber">{stats.topDrinker.count}</span>
-                <span className="text-sm text-barrel-light ml-2 mb-1">beers</span>
+        <div className="overflow-y-auto max-h-32 pr-2">
+          <div className="space-y-2">
+            {/* Mock BRZ token holders - in a real app, this would fetch from Base blockchain */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">M</span>
+                </div>
+                <span className="ml-2 text-sm font-medium">Maria</span>
               </div>
+              <span className="text-sm font-bold text-hops-green">1,250 BRZ</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">C</span>
+                </div>
+                <span className="ml-2 text-sm font-medium">Chris</span>
+              </div>
+              <span className="text-sm font-bold text-hops-green">980 BRZ</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">J</span>
+                </div>
+                <span className="ml-2 text-sm font-medium">Jorge</span>
+              </div>
+              <span className="text-sm font-bold text-hops-green">750 BRZ</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">A</span>
+                </div>
+                <span className="ml-2 text-sm font-medium">Ana</span>
+              </div>
+              <span className="text-sm font-bold text-hops-green">525 BRZ</span>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-4">
-            <p className="text-barrel-light">No drinkers yet!</p>
+        </div>
+        
+        {/* Top chugger highlight section */}
+        {stats.topDrinker && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-beer-amber rounded-full flex items-center justify-center border-2 border-beer-dark overflow-hidden relative">
+                  <span className="text-lg font-bold text-white">{stats.topDrinker.initial}</span>
+                </div>
+                <div className="ml-2">
+                  <span className="text-xs text-barrel-light">Top Chugger</span>
+                  <h4 className="text-sm font-bold text-barrel-dark">{stats.topDrinker.name}</h4>
+                </div>
+              </div>
+              <div className="flex items-end">
+                <span className="text-xl font-bungee text-beer-amber">{stats.topDrinker.count}</span>
+                <i className="ri-trophy-fill ml-1 text-yellow-500"></i>
+              </div>
+            </div>
           </div>
         )}
       </div>
