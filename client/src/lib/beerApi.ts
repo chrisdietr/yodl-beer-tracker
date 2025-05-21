@@ -152,6 +152,6 @@ export function useAddBeerConsumption() {
 export function useAddDrinker() {
   return { mutate: () => {}, isLoading: false };
 }
-export function useBrzTokenHolders() {
+export function useBrzTokenHolders(): { data: BrzTokenHolder[]; isLoading: boolean } {
   return { data: [], isLoading: false };
 }
