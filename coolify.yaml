@@ -1,6 +1,6 @@
 services:
   frontend:
-    name: beer-tracker-frontend
+    name: beer-tracker
     type: static
     root: client
     dockerfile: Dockerfile
@@ -11,18 +11,3 @@ services:
       path: /usr/share/nginx/html
       port: 80
 
-  backend:
-    name: beer-tracker-backend
-    type: nodejs
-    root: server
-    dockerfile: Dockerfile
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    env:
-      # Add your backend environment variables here
-      # DATABASE_URL: "file:/app/beer_tracker.db"
-    volumes:
-      - ./beer_tracker.db:/app/beer_tracker.db
-    ports:
-      - 3000:3000 
