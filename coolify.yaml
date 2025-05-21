@@ -2,10 +2,10 @@ services:
   frontend:
     name: beer-tracker
     type: static
-    root: client
+    root: .
     dockerfile: Dockerfile
     build:
-      context: ./client
+      context: .
       dockerfile: Dockerfile
     publish:
       path: /usr/share/nginx/html
