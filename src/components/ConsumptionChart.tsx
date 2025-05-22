@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { TimeSeriesData } from '@shared/schema';
 import { Chart, registerables } from 'chart.js';
-import { format } from 'date-fns';
+import { format, addMinutes, isBefore, startOfMinute } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
 // Register Chart.js components
@@ -10,6 +10,12 @@ Chart.register(...registerables);
 interface ConsumptionChartProps {
   timeSeriesData: TimeSeriesData[];
   isLoading: boolean;
+}
+
+function get5MinGroup(date: Date) {
+  const minutes = date.getMinutes();
+  const floored = minutes - (minutes % 5);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), floored, 0, 0);
 }
 
 export default function ConsumptionChart({ 
@@ -22,34 +28,29 @@ export default function ConsumptionChart({
   useEffect(() => {
     if (!chartRef.current || !timeSeriesData.length) return;
     
-    // Format labels always by hour:minute
-    const formatTimeLabel = (timestamp: string) => {
-      const zonedDate = toZonedTime(new Date(timestamp), 'America/Sao_Paulo');
-      return format(zonedDate, 'HH:mm');
-    };
-
     // 1. Find min and max timestamps
     const timestamps = timeSeriesData.map(item => new Date(item.timestamp));
-    const minDate = new Date(Math.min(...timestamps.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...timestamps.map(d => d.getTime())));
+    const minDate = get5MinGroup(new Date(Math.min(...timestamps.map(d => d.getTime()))));
+    const maxDate = get5MinGroup(new Date(Math.max(...timestamps.map(d => d.getTime()))));
 
-    // 2. Generate all minute intervals between min and max
-    const minuteIntervals: string[] = [];
-    let current = new Date(minDate);
-    while (current <= maxDate) {
-      minuteIntervals.push(current.toISOString());
-      current = new Date(current.getTime() + 60 * 1000); // add 1 minute
+    // 2. Generate all 5-minute intervals between min and max
+    const intervals: Date[] = [];
+    let current = minDate;
+    while (!isBefore(maxDate, current)) {
+      intervals.push(new Date(current));
+      current = addMinutes(current, 5);
     }
 
-    // 3. Map counts to each minute, fill missing with 0, and sum counts for each minute
+    // 3. Map counts to each 5-minute interval
     const timeSeriesMap = new Map<string, number>();
     for (const item of timeSeriesData) {
-      const key = format(new Date(item.timestamp), "yyyy-MM-dd'T'HH:mm");
+      const group = get5MinGroup(new Date(item.timestamp));
+      const key = group.toISOString();
       timeSeriesMap.set(key, (timeSeriesMap.get(key) || 0) + item.count);
     }
-    const labels = minuteIntervals.map(ts => formatTimeLabel(ts));
-    const data = minuteIntervals.map(ts => {
-      const key = format(new Date(ts), "yyyy-MM-dd'T'HH:mm");
+    const labels = intervals.map(ts => format(toZonedTime(ts, 'America/Sao_Paulo'), 'HH:mm'));
+    const data = intervals.map(ts => {
+      const key = ts.toISOString();
       return timeSeriesMap.get(key) || 0;
     });
 
@@ -83,7 +84,8 @@ export default function ConsumptionChart({
             borderColor: '#E6A817',
             backgroundColor: 'rgba(230, 168, 23, 0.1)',
             fill: true,
-            tension: 0.3
+            tension: 0.3,
+            yAxisID: 'y',
           },
           {
             label: 'Cumulative Total',
@@ -94,7 +96,7 @@ export default function ConsumptionChart({
             tension: 0.1,
             borderDash: [5, 5],
             pointRadius: 0,
-            yAxisID: 'y',
+            yAxisID: 'y1',
           }
         ]
       },
@@ -142,6 +144,13 @@ export default function ConsumptionChart({
           },
           y: {
             beginAtZero: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Beers Drunk',
+              color: '#E6A817',
+              font: { family: '"Roboto", sans-serif', weight: 'bold', size: 14 }
+            },
             grid: {
               color: 'rgba(139, 90, 43, 0.1)'
             },
@@ -149,8 +158,31 @@ export default function ConsumptionChart({
               font: {
                 family: '"Roboto", sans-serif'
               },
+              color: '#E6A817',
               callback: function(value) {
                 return value + ' 🍺';
+              }
+            }
+          },
+          y1: {
+            beginAtZero: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Cumulative Total',
+              color: '#8B5A2B',
+              font: { family: '"Roboto", sans-serif', weight: 'bold', size: 14 }
+            },
+            grid: {
+              drawOnChartArea: false
+            },
+            ticks: {
+              font: {
+                family: '"Roboto", sans-serif'
+              },
+              color: '#8B5A2B',
+              callback: function(value) {
+                return value;
               }
             }
           }

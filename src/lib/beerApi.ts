@@ -74,9 +74,9 @@ function transformPaymentsToStats(payments: Payment[], timeRange = 'day') {
     if (!d.lastBeer || d.lastBeer < timestamp) d.lastBeer = timestamp;
     // Today count
     if (date === today) todayCount += amount;
-    // Time series (always by hour)
-    // Group by hour, set minutes and seconds to 00 for valid ISO
-    let key = timestamp.slice(0, 13) + ':00:00'; // YYYY-MM-DDTHH:00:00
+    // Time series (always by minute)
+    // Group by minute, set seconds to 00 for valid ISO
+    let key = timestamp.slice(0, 16) + ':00'; // YYYY-MM-DDTHH:MM:00
     timeSeriesMap.set(key, (timeSeriesMap.get(key) || 0) + amount);
     // Record
     if (!recordDate || d.count > recordCount) {
