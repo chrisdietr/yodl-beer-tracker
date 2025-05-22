@@ -10,15 +10,11 @@ Chart.register(...registerables);
 interface ConsumptionChartProps {
   timeSeriesData: TimeSeriesData[];
   isLoading: boolean;
-  timeRange: 'hour' | 'day' | 'all';
-  onTimeRangeChange: (range: 'hour' | 'day' | 'all') => void;
 }
 
 export default function ConsumptionChart({ 
   timeSeriesData,
   isLoading,
-  timeRange,
-  onTimeRangeChange
 }: ConsumptionChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
@@ -26,31 +22,49 @@ export default function ConsumptionChart({
   useEffect(() => {
     if (!chartRef.current || !timeSeriesData.length) return;
     
-    // Format labels based on time range
+    // Format labels always by hour:minute
     const formatTimeLabel = (timestamp: string) => {
-      // Convert to Florianópolis timezone
       const zonedDate = toZonedTime(new Date(timestamp), 'America/Sao_Paulo');
-      switch(timeRange) {
-        case 'hour':
-          return format(zonedDate, 'HH:mm');
-        case 'day':
-          return format(zonedDate, 'HH:mm');
-        case 'all':
-        default:
-          return format(zonedDate, 'MM/dd HH:mm');
-      }
+      return format(zonedDate, 'HH:mm');
     };
-    
-    const labels = timeSeriesData.map(item => formatTimeLabel(item.timestamp));
-    const data = timeSeriesData.map(item => item.count);
-    
-    // Calculate cumulative sum for each point
+
+    // 1. Find min and max timestamps
+    const timestamps = timeSeriesData.map(item => new Date(item.timestamp));
+    const minDate = new Date(Math.min(...timestamps.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...timestamps.map(d => d.getTime())));
+
+    // 2. Generate all minute intervals between min and max
+    const minuteIntervals: string[] = [];
+    let current = new Date(minDate);
+    while (current <= maxDate) {
+      minuteIntervals.push(current.toISOString());
+      current = new Date(current.getTime() + 60 * 1000); // add 1 minute
+    }
+
+    // 3. Map counts to each minute, fill missing with 0, and sum counts for each minute
+    const timeSeriesMap = new Map<string, number>();
+    for (const item of timeSeriesData) {
+      const key = format(new Date(item.timestamp), "yyyy-MM-dd'T'HH:mm");
+      timeSeriesMap.set(key, (timeSeriesMap.get(key) || 0) + item.count);
+    }
+    const labels = minuteIntervals.map(ts => formatTimeLabel(ts));
+    const data = minuteIntervals.map(ts => {
+      const key = format(new Date(ts), "yyyy-MM-dd'T'HH:mm");
+      return timeSeriesMap.get(key) || 0;
+    });
+
+    // 4. Calculate cumulative sum for each point
     const cumulativeData = [];
     let runningTotal = 0;
-    for (const item of timeSeriesData) {
-      runningTotal += item.count;
+    for (const count of data) {
+      runningTotal += count;
       cumulativeData.push(runningTotal);
     }
+
+    // Debug: log the chart data
+    console.log('labels', labels);
+    console.log('data', data);
+    console.log('cumulativeData', cumulativeData);
     
     // Destroy previous chart if it exists
     if (chartInstance.current) {
@@ -120,7 +134,10 @@ export default function ConsumptionChart({
             ticks: {
               font: {
                 family: '"Roboto", sans-serif'
-              }
+              },
+              autoSkip: false,
+              maxRotation: 60,
+              minRotation: 45,
             }
           },
           y: {
@@ -157,21 +174,12 @@ export default function ConsumptionChart({
         chartInstance.current.destroy();
       }
     };
-  }, [timeSeriesData, timeRange]);
+  }, [timeSeriesData]);
   
   return (
     <div className="bg-white rounded-xl shadow-xl overflow-hidden border-2 border-barrel-brown mb-8">
       <div className="px-6 py-4 bg-barrel-brown flex justify-between items-center">
         <h2 className="text-2xl font-bungee text-white">Consumption Over Time</h2>
-        <select 
-          className="bg-barrel-light text-barrel-dark rounded px-3 py-1 text-sm"
-          value={timeRange}
-          onChange={(e) => onTimeRangeChange(e.target.value as 'hour' | 'day' | 'all')}
-        >
-          <option value="hour">Last Hour</option>
-          <option value="day">Today</option>
-          <option value="all">All Time</option>
-        </select>
       </div>
       
       <div className="p-4">

@@ -22,14 +22,13 @@ export default function HomePage() {
 function HomePageContent() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [timeRange, setTimeRange] = useState<'hour' | 'day' | 'all'>('day');
   const { showNotification } = useNotification();
   
   // Reference to track previous leaderboard state for comparison
   const prevLeaderboardRef = useRef<DrinkerWithStats[]>([]);
 
-  // Fetch app stats from webhook
-  const { data: stats, isLoading, error, refetch } = useAppStats(timeRange);
+  // Fetch app stats from webhook (no timeRange)
+  const { data: stats, isLoading, error, refetch } = useAppStats();
 
   // Refetch data handler
   const handleRefresh = async () => {
@@ -166,8 +165,6 @@ function HomePageContent() {
                 <ConsumptionChart 
                   timeSeriesData={stats.timeSeriesData}
                   isLoading={isLoading}
-                  timeRange={timeRange}
-                  onTimeRangeChange={setTimeRange}
                 />
                 
                 <BarrelVisualization 

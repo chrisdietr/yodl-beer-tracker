@@ -49,7 +49,7 @@ function transformPaymentsToStats(payments: Payment[], timeRange = 'day') {
   let recordDate = null;
   let timeSeriesData = [];
 
-  // Group by hour/minute for time series
+  // Group by hour for time series
   const timeSeriesMap = new Map();
 
   for (const p of payments) {
@@ -74,18 +74,9 @@ function transformPaymentsToStats(payments: Payment[], timeRange = 'day') {
     if (!d.lastBeer || d.lastBeer < timestamp) d.lastBeer = timestamp;
     // Today count
     if (date === today) todayCount += amount;
-    // Time series (by minute)
-    let key;
-    if (timeRange === 'hour') {
-      // Group by minute, but set seconds to 00 for valid ISO
-      key = timestamp.slice(0, 16) + ':00'; // YYYY-MM-DDTHH:mm:00
-    } else if (timeRange === 'day') {
-      // Group by hour, set minutes and seconds to 00
-      key = timestamp.slice(0, 13) + ':00:00'; // YYYY-MM-DDTHH:00:00
-    } else {
-      // Group by day, set time to 00:00:00
-      key = date + 'T00:00:00'; // YYYY-MM-DDT00:00:00
-    }
+    // Time series (always by hour)
+    // Group by hour, set minutes and seconds to 00 for valid ISO
+    let key = timestamp.slice(0, 13) + ':00:00'; // YYYY-MM-DDTHH:00:00
     timeSeriesMap.set(key, (timeSeriesMap.get(key) || 0) + amount);
     // Record
     if (!recordDate || d.count > recordCount) {
