@@ -53,7 +53,7 @@ function transformPaymentsToStats(payments: Payment[], timeRange = 'day') {
   const timeSeriesMap = new Map();
 
   for (const p of payments) {
-    const name = p.payments_senderEnsPrimaryName;
+    const name = p.payments_senderEnsPrimaryName || 'Unknown';
     const amount = parseFloat(p.payments_beerAmount);
     const timestamp = p.payments_blockTimestamp;
     const date = timestamp.slice(0, 10);
@@ -122,9 +122,25 @@ export function useAppStats(timeRange = 'day') {
     queryFn: async () => {
       console.log('Fetching from:', WEBHOOK_URL);
       const res = await fetch(WEBHOOK_URL);
+      console.log('res:', res);
+      const body = await res.text();
+      console.log('res body:', body);
       if (!res.ok) throw new Error('Failed to fetch payments data');
-      const payments = await res.json();
-      return transformPaymentsToStats(payments, timeRange);
+      let payments;
+      try {
+        payments = JSON.parse(body);
+      } catch (e) {
+        throw new Error('Failed to parse payments data as JSON');
+      }
+      if (!Array.isArray(payments)) {
+        throw new Error('Payments data is not an array');
+      }
+      try {
+        return transformPaymentsToStats(payments, timeRange);
+      } catch (error) {
+        console.error('Error transforming payments data:', error);
+        throw error;
+      }
     },
     refetchInterval: 10000,
   });

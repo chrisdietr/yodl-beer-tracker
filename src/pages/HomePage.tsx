@@ -118,24 +118,24 @@ function HomePageContent() {
     return () => clearInterval(interval);
   }, []);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
-          <h2 className="text-2xl font-bold text-red-500 mb-4">Error Loading Data</h2>
-          <p className="text-gray-700">
-            Failed to load beer data. Please try again later.
-          </p>
-          <button 
-            onClick={() => refetch()} 
-            className="mt-4 px-4 py-2 bg-beer-amber text-white rounded-md hover:bg-beer-dark"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
+  //         <h2 className="text-2xl font-bold text-red-500 mb-4">Error Loading Data</h2>
+  //         <p className="text-gray-700">
+  //           Failed to load beer data. Please try again later.
+  //         </p>
+  //         <button 
+  //           onClick={() => refetch()} 
+  //           className="mt-4 px-4 py-2 bg-beer-amber text-white rounded-md hover:bg-beer-dark"
+  //         >
+  //           Retry
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div>
