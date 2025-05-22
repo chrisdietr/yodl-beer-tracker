@@ -73,23 +73,24 @@ export function NotificationContainer() {
   const { notifications, removeNotification } = useNotification();
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed top-6 right-6 z-50">
       {notifications.map((notification) => (
         <div 
           key={notification.id}
-          className="bg-white rounded-lg shadow-lg p-4 mb-3 transform transition-all duration-300 flex items-center border-l-4 border-beer-amber max-w-sm"
+          className="bg-white rounded-2xl shadow-2xl p-6 mb-6 transform transition-all duration-300 flex items-center border-l-8 border-beer-amber max-w-lg text-lg"
           style={{ opacity: 1, transform: 'translateX(0)' }}
         >
-          <div className="text-beer-amber mr-3">
-            <i className="ri-beer-fill text-xl"></i>
+          <div className="flex items-center text-beer-amber mr-5 text-3xl">
+            <span className="mr-1">✨</span>
+            <i className="ri-beer-fill"></i>
           </div>
           <div className="flex-1">
-            <h4 className="font-bold text-barrel-dark">New beer update!</h4>
-            <p className="text-sm text-barrel-light">{notification.message}</p>
+            <h4 className="font-extrabold text-barrel-dark text-xl mb-1">New beer update!</h4>
+            <p className="text-base text-barrel-light">{notification.message}</p>
           </div>
           <button 
             onClick={() => removeNotification(notification.id)}
-            className="ml-4 text-barrel-light hover:text-barrel-dark"
+            className="ml-6 text-barrel-light hover:text-barrel-dark text-2xl"
           >
             <i className="ri-close-line"></i>
           </button>

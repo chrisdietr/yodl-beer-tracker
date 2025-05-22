@@ -139,6 +139,7 @@ function HomePageContent() {
 
   return (
     <div>
+      <NotificationContainer />
       {/* Beer-themed background with bubbles */}
       <div id="background-container" className="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
       
@@ -169,7 +170,7 @@ function HomePageContent() {
                 
                 <BarrelVisualization 
                   todayBarrel={stats.todayBarrel}
-                  recordBarrel={stats.recordBarrel}
+                  drinkers={stats.drinkers}
                 />
               </div>
             </div>
@@ -178,8 +179,6 @@ function HomePageContent() {
           </>
         ) : null}
       </div>
-      
-      <NotificationContainer />
     </div>
   );
 }
