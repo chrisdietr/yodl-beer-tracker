@@ -10,10 +10,20 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
   const { data: brzTokenHolders, isLoading: isLoadingBrz } = useBrzTokenHolders();
   // Determine pace message based on current pace
   const getPaceMessage = (pace: number) => {
-    if (pace === 0) return "No beers in the last hour!";
-    if (pace < 2) return "Slow and steady wins the race! 🐢";
+    if (pace === 0) return "No beers in the last hour! Time to get started! 🎯";
+    if (pace < 1) return "Just getting warmed up! 🌡️";
+    if (pace < 2) return "Slow and steady wins the race! 🐢"; 
+    if (pace < 3) return "Finding your rhythm! 🎵";
+    if (pace < 4) return "Cruising along nicely! ⛵";
     if (pace < 5) return "That's a solid pace! 🍻";
-    if (pace < 10) return "Now we're talking! Party on! 🔥";
+    if (pace < 6) return "The party is picking up! 🎉";
+    if (pace < 7) return "You're in the groove! 🕺";
+    if (pace < 8) return "Now we're cooking! 🔥";
+    if (pace < 9) return "This is getting serious! 💪";
+    if (pace < 10) return "Now we're talking! Party on! 🎸";
+    if (pace < 12) return "You're on fire! 🔥🔥";
+    if (pace < 15) return "Absolutely crushing it! 💯";
+    if (pace < 20) return "You're a beer drinking machine! 🤖";
     return "Wow! That's legendary pace! 🚀";
   };
 
@@ -120,7 +130,7 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
           <span className="text-sm text-barrel-light ml-2 mb-1">beers per hour</span>
         </div>
         <div className="mt-4 text-center">
-          <span className="text-sm font-medium text-hops-green">
+          <span className="text-3xl font-medium text-hops-green">
             {getPaceMessage(stats.currentPace)}
           </span>
         </div>

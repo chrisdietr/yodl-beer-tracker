@@ -19,9 +19,9 @@ export default function Leaderboard({ drinkers, isLoading }: LeaderboardProps) {
     let interval: NodeJS.Timeout | null = null;
     let pauseTimeout: NodeJS.Timeout | null = null;
 
-    const scrollStep = 2; // px per tick
+    const scrollStep = 3; // px per tick
     const tick = 20; // ms per tick
-    const pauseDuration = 1200; // ms to pause at top/bottom
+    const pauseDuration = 2000; // ms to pause at top/bottom
 
     function animateScroll() {
       if (!scrollContainer) return;
