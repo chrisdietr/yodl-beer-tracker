@@ -18,7 +18,7 @@ export default function AppHeader({ lastUpdated, isRefreshing, onRefresh }: AppH
           </div>
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bungee text-beer-amber drop-shadow-md tracking-wider">CHOPP CONTROL</h1>
+        <h1 className="text-4xl md:text-5xl font-bungee text-beer-amber drop-shadow-md tracking-wider">CHOPP FLOW</h1>
         
         {/* Second beer mug logo */}
         <div className="relative">

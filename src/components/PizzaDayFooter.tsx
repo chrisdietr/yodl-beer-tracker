@@ -8,7 +8,7 @@ export default function PizzaDayFooter() {
           Jacksonville, Florida, for 10,000 BTC. Today we celebrate with beer instead of pizza!
         </p>
         <div className="flex justify-center space-x-2 text-sm">
-          <span>© {new Date().getFullYear()} Chopp Control</span>
+          <span>© {new Date().getFullYear()} Chopp Flow</span>
           <span>|</span>
           <span>Data refreshes every 10 seconds</span>
         </div>

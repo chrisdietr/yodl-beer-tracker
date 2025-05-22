@@ -81,7 +81,7 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
             ) : (
               // No data state
               <div className="text-center py-4">
-                <p className="text-barrel-light">No BRZ token holders found.</p>
+                <p className="text-barrel-light">ASK TEAM FOR TOKENS!!!</p>
               </div>
             )}
           </div>
