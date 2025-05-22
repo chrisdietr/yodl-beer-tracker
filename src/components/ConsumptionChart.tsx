@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { TimeSeriesData } from '@shared/schema';
 import { Chart, registerables } from 'chart.js';
 import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -27,15 +28,16 @@ export default function ConsumptionChart({
     
     // Format labels based on time range
     const formatTimeLabel = (timestamp: string) => {
-      const date = new Date(timestamp);
+      // Convert to Florianópolis timezone
+      const zonedDate = toZonedTime(new Date(timestamp), 'America/Sao_Paulo');
       switch(timeRange) {
         case 'hour':
-          return format(date, 'HH:mm');
+          return format(zonedDate, 'HH:mm');
         case 'day':
-          return format(date, 'HH:mm');
+          return format(zonedDate, 'HH:mm');
         case 'all':
         default:
-          return format(date, 'MM/dd HH:mm');
+          return format(zonedDate, 'MM/dd HH:mm');
       }
     };
     
