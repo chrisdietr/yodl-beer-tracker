@@ -62,9 +62,9 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
         </div>
       </div>
       
-      {/* Top Jugger (celebratory) section with Runner Up inside same card */}
+      {/* Top Jugger (celebratory) section with Runner Up and Average inside same card */}
       {stats.drinkers && stats.drinkers.length > 0 && (
-        <div className="bg-white rounded-xl shadow-lg p-4 border-2 border-yellow-400 flex flex-col justify-between relative overflow-hidden animate-pulse-card" style={{ minHeight: 160 }}>
+        <div className="bg-white rounded-xl shadow-lg p-4 border-2 border-yellow-400 flex flex-col justify-between relative overflow-hidden animate-pulse-card" style={{ minHeight: 180 }}>
           <div className="absolute top-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
             <span className="text-2xl">🔥</span>
             <span className="text-2xl">🔥</span>
@@ -112,6 +112,26 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
                   {stats.drinkers[1].count}
                 </span>
                 <span className="text-xs text-hops-green font-bold mt-1">Keep it up!</span>
+              </div>
+            </div>
+          )}
+          {/* Average section (inside same card) */}
+          {stats.drinkers.length > 0 && (
+            <div className="flex items-center justify-between mt-2 w-full border-t border-yellow-100 pt-2">
+              <div className="flex items-center min-w-0">
+                <div className="w-8 h-8 bg-barrel-light rounded-full flex items-center justify-center border-2 border-barrel-dark overflow-hidden relative shadow shrink-0">
+                  <span className="text-base font-bold text-barrel-dark drop-shadow">AVG</span>
+                </div>
+                <div className="ml-3 min-w-0">
+                  <span className="text-xs text-barrel-light font-bungee uppercase tracking-widest">Average</span>
+                  <h4 className="text-base font-bold text-barrel-dark flex items-center break-words whitespace-normal max-w-[100px] md:max-w-[140px]">
+                    {Math.round(stats.drinkers.reduce((sum, d) => sum + d.count, 0) / stats.drinkers.length)}
+                    <span className="ml-2 text-base">🍺</span>
+                  </h4>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-barrel-light font-bold mt-1">Per Drinker</span>
               </div>
             </div>
           )}
