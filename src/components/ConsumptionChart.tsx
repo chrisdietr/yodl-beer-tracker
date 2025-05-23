@@ -215,7 +215,7 @@ export default function ConsumptionChart({
       </div>
       
       <div className="p-4">
-        <div className="h-64 relative">
+        <div className="h-[450px] relative">
           {/* Chart */}
           <canvas ref={chartRef} />
           

@@ -102,3 +102,22 @@
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
+
+.animate-pulse-card {
+  animation: pulse-card 2s infinite;
+}
+
+@keyframes pulse-card {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4), 0 1px 3px 0 rgba(0,0,0,0.08);
+    border-color: #FFD600;
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(255, 193, 7, 0.7), 0 1px 3px 0 rgba(0,0,0,0.08);
+    border-color: #FFEB3B;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4), 0 1px 3px 0 rgba(0,0,0,0.08);
+    border-color: #FFD600;
+  }
+}

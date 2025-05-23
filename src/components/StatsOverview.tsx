@@ -62,62 +62,61 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
         </div>
       </div>
       
-      {/* BRZ token holders card */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-hops-green">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-bold text-barrel-dark">Gib Beer Token</h3>
-          <i className="ri-coin-fill text-2xl text-hops-green"></i>
-        </div>
-        <div className="overflow-y-auto max-h-32 pr-2">
-          <div className="space-y-2">
-            {isLoadingBrz ? (
-              // Loading state
-              <div className="flex justify-center items-center h-16">
-                <div className="animate-pulse text-beer-amber">Loading BRZ token data...</div>
-              </div>
-            ) : brzTokenHolders && brzTokenHolders.length > 0 ? (
-              // BRZ token holders from the database
-              brzTokenHolders.map((holder) => (
-                <div key={holder.id} className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-beer-amber rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-white">{holder.initial}</span>
-                    </div>
-                    <span className="ml-2 text-sm font-medium">{holder.username}</span>
-                  </div>
-                  <span className="text-sm font-bold text-hops-green">{holder.amount.toLocaleString()} BRZ</span>
-                </div>
-              ))
-            ) : (
-              // No data state
-              <div className="text-center py-4">
-                <p className="text-barrel-light">ASK TEAM FOR TOKENS!!!</p>
-              </div>
-            )}
+      {/* Top Jugger (celebratory) section with Runner Up inside same card */}
+      {stats.drinkers && stats.drinkers.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-4 border-2 border-yellow-400 flex flex-col justify-between relative overflow-hidden animate-pulse-card" style={{ minHeight: 160 }}>
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
+            <span className="text-2xl">🔥</span>
+            <span className="text-2xl">🔥</span>
+            <span className="text-2xl">🔥</span>
           </div>
-        </div>
-        
-        {/* Top chugger highlight section */}
-        {stats.topDrinker && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-beer-amber rounded-full flex items-center justify-center border-2 border-beer-dark overflow-hidden relative">
-                  <span className="text-lg font-bold text-white">{stats.topDrinker.initial}</span>
-                </div>
-                <div className="ml-2">
-                  <span className="text-xs text-barrel-light">Top Chugger</span>
-                  <h4 className="text-sm font-bold text-barrel-dark">{stats.topDrinker.name}</h4>
-                </div>
+          {/* Top Jugger */}
+          <div className="flex items-center justify-between mt-8 mb-2 w-full">
+            <div className="flex items-center min-w-0">
+              <div className="w-12 h-12 bg-beer-amber rounded-full flex items-center justify-center border-4 border-yellow-400 overflow-hidden relative shadow-lg shrink-0">
+                <span className="text-xl font-bold text-white drop-shadow">{stats.drinkers[0].initial}</span>
               </div>
-              <div className="flex items-end">
-                <span className="text-xl font-bungee text-beer-amber">{stats.topDrinker.count}</span>
-                <i className="ri-trophy-fill ml-1 text-yellow-500"></i>
+              <div className="ml-3 min-w-0">
+                <span className="text-xs text-barrel-light font-bungee uppercase tracking-widest">Top Jugger</span>
+                <h4 className="text-base font-bold text-barrel-dark flex items-center break-words whitespace-normal max-w-[140px] md:max-w-[200px]">
+                  {stats.drinkers[0].username}
+                  <span className="ml-2 text-xl">🏆</span>
+                </h4>
               </div>
             </div>
+            <div className="flex flex-col items-end">
+              <span className="text-2xl font-bungee text-beer-amber flex items-center">
+                {stats.drinkers[0].count}
+                <span className="ml-2 text-2xl">🔥</span>
+              </span>
+              <span className="text-xs text-yellow-500 font-bold mt-1">Legendary Chug!</span>
+            </div>
           </div>
-        )}
-      </div>
+          {/* Runner Up (inside same card) */}
+          {stats.drinkers.length > 1 && (
+            <div className="flex items-center justify-between mt-2 w-full border-t border-yellow-100 pt-2">
+              <div className="flex items-center min-w-0">
+                <div className="w-10 h-10 bg-hops-green rounded-full flex items-center justify-center border-2 border-hops-green overflow-hidden relative shadow shrink-0">
+                  <span className="text-lg font-bold text-white drop-shadow">{stats.drinkers[1].initial}</span>
+                </div>
+                <div className="ml-3 min-w-0">
+                  <span className="text-xs text-barrel-light font-bungee uppercase tracking-widest">Runner Up</span>
+                  <h4 className="text-base font-bold text-barrel-dark flex items-center break-words whitespace-normal max-w-[120px] md:max-w-[180px]">
+                    {stats.drinkers[1].username}
+                    <span className="ml-2 text-lg">🥈</span>
+                  </h4>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xl font-bungee text-hops-green flex items-center">
+                  {stats.drinkers[1].count}
+                </span>
+                <span className="text-xs text-hops-green font-bold mt-1">Keep it up!</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       
       {/* Current pace card */}
       <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-barrel-brown">

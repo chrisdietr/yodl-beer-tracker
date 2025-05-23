@@ -142,7 +142,7 @@ export function useAppStats(timeRange = 'day') {
         throw error;
       }
     },
-    refetchInterval: 10000,
+    refetchInterval: 5000,
   });
 }
 
