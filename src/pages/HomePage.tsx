@@ -10,6 +10,7 @@ import BarrelVisualization from "@/components/BarrelVisualization";
 import PizzaDayFooter from "@/components/PizzaDayFooter";
 import { NotificationProvider, NotificationContainer, useNotification } from "@/components/Notification";
 import { useAppStats } from "@/lib/beerApi";
+import { HomePageSkeleton } from "@/components/LoadingSkeletons";
 
 export default function HomePage() {
   return (
@@ -146,14 +147,9 @@ function HomePageContent() {
       {/* Main container */}
       <div className="container mx-auto px-4 py-6 relative z-10">
         <AppHeader lastUpdated={lastUpdated} isRefreshing={isRefreshing} onRefresh={handleRefresh} />
-        
+
         {isLoading ? (
-          <div className="py-16 text-center">
-            <div className="inline-block animate-spin mb-4">
-              <i className="ri-loader-4-line text-4xl text-beer-amber"></i>
-            </div>
-            <p className="text-xl text-barrel-light">Loading beer data...</p>
-          </div>
+          <HomePageSkeleton />
         ) : stats ? (
           <>
             <StatsOverview stats={stats} />
@@ -168,8 +164,9 @@ function HomePageContent() {
                   isLoading={isLoading}
                 />
                 
-                <BarrelVisualization 
+                <BarrelVisualization
                   todayBarrel={stats.todayBarrel}
+                  recordBarrel={stats.recordBarrel}
                   drinkers={stats.drinkers}
                 />
               </div>

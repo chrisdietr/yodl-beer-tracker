@@ -2,6 +2,7 @@ import { apiRequest } from "./queryClient";
 import { StatsResponse, DrinkerWithStats, TimeSeriesData } from "@shared/schema";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
+import { MockBeerApi, isMockModeEnabled, type MockPayment } from "./mockService";
 
 // BRZ token holder interface
 export interface BrzTokenHolder {
@@ -24,8 +25,10 @@ const API_ENDPOINTS = {
 };
 
 const WEBHOOK_URL = import.meta.env.VITE_BEER_WEBHOOK_URL;
+const USE_MOCK_DATA = isMockModeEnabled();
 
 console.log('VITE_BEER_WEBHOOK_URL:', import.meta.env.VITE_BEER_WEBHOOK_URL);
+console.log('USE_MOCK_DATA:', USE_MOCK_DATA);
 
 // --- Data transformation helpers ---
 
@@ -118,23 +121,35 @@ function transformPaymentsToStats(payments: Payment[], timeRange = 'day') {
 
 export function useAppStats(timeRange = 'day') {
   return useQuery({
-    queryKey: [WEBHOOK_URL, timeRange],
+    queryKey: [WEBHOOK_URL, timeRange, 'mock', USE_MOCK_DATA],
     queryFn: async () => {
-      console.log('Fetching from:', WEBHOOK_URL);
-      const res = await fetch(WEBHOOK_URL);
-      console.log('res:', res);
-      const body = await res.text();
-      console.log('res body:', body);
-      if (!res.ok) throw new Error('Failed to fetch payments data');
-      let payments;
-      try {
-        payments = JSON.parse(body);
-      } catch (e) {
-        throw new Error('Failed to parse payments data as JSON');
+      let payments: Payment[];
+
+      // Use mock data if enabled
+      if (USE_MOCK_DATA) {
+        console.log('🍺 Using mock data service');
+        payments = await MockBeerApi.fetchMockData() as Payment[];
+      } else {
+        // Fetch from real webhook
+        console.log('Fetching from:', WEBHOOK_URL);
+        const res = await fetch(WEBHOOK_URL);
+        console.log('res:', res);
+        const body = await res.text();
+        console.log('res body:', body);
+        if (!res.ok) throw new Error('Failed to fetch payments data');
+
+        try {
+          payments = JSON.parse(body);
+        } catch (e) {
+          throw new Error('Failed to parse payments data as JSON');
+        }
+
+        if (!Array.isArray(payments)) {
+          throw new Error('Payments data is not an array');
+        }
       }
-      if (!Array.isArray(payments)) {
-        throw new Error('Payments data is not an array');
-      }
+
+      // Transform and return
       try {
         return transformPaymentsToStats(payments, timeRange);
       } catch (error) {

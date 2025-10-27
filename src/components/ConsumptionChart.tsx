@@ -209,39 +209,56 @@ export default function ConsumptionChart({
   }, [timeSeriesData]);
   
   return (
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden border-2 border-barrel-brown mb-8">
-      <div className="px-6 py-4 bg-barrel-brown flex justify-between items-center">
-        <h2 className="text-2xl font-bungee text-white">Consumption Over Time</h2>
+    <section
+      className="bg-white rounded-xl shadow-xl overflow-hidden border-2 border-barrel-brown mb-8"
+      aria-labelledby="consumption-chart-title"
+    >
+      <div className="px-4 sm:px-6 py-4 bg-barrel-brown flex justify-between items-center">
+        <h2 id="consumption-chart-title" className="text-xl sm:text-2xl font-bungee text-white">
+          Consumption Over Time
+        </h2>
       </div>
-      
-      <div className="p-4">
-        <div className="h-[450px] relative">
+
+      <div className="p-2 sm:p-4">
+        <div className="h-[300px] sm:h-[400px] md:h-[450px] relative">
           {/* Chart */}
-          <canvas ref={chartRef} />
+          <canvas ref={chartRef} role="img" aria-label="Beer consumption timeline chart" />
           
           {/* Loading state */}
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80"
+              role="status"
+              aria-live="polite"
+            >
               <div className="text-center">
-                <div className="inline-block animate-spin mb-2">
+                <div className="inline-block animate-spin mb-2" aria-hidden="true">
                   <i className="ri-loader-4-line text-3xl text-beer-amber"></i>
                 </div>
                 <p className="text-barrel-light">Loading chart data...</p>
               </div>
             </div>
           )}
-          
+
           {/* Empty state */}
           {!isLoading && timeSeriesData.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              role="status"
+            >
               <div className="text-center">
-                <i className="ri-bar-chart-grouped-line text-5xl text-beer-amber mb-2"></i>
-                <p className="text-barrel-light">No consumption data available for this time period</p>
+                <i
+                  className="ri-bar-chart-grouped-line text-5xl text-beer-amber mb-2"
+                  aria-hidden="true"
+                ></i>
+                <p className="text-barrel-light">
+                  No consumption data available for this time period
+                </p>
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
